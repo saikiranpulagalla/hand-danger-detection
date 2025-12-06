@@ -112,15 +112,12 @@ class HandDetector:
         if not contours:
             return result
         
-        # Filter contours by area - balanced to catch hands but reject arms/objects
-        # Hand area: ~2000-100000 px depending on distance
-        # Arm/large objects: 100000+ px
-        hand_min_area = 2000    # Minimum to avoid small noise
-        hand_max_area = 100000  # Maximum to reject large objects
-        
+        # Filter contours by area using instance thresholds (configurable from main.py)
+        # Defaults: min_hand_area=1000, max_hand_area=500000
+        # Effective filtering: rejects contours outside this range
         valid_contours = [
             c for c in contours 
-            if hand_min_area < cv2.contourArea(c) < hand_max_area
+            if self.min_hand_area < cv2.contourArea(c) < self.max_hand_area
         ]
         
         if not valid_contours:
