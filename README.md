@@ -22,7 +22,7 @@ A **CPU-optimized computer vision prototype** that tracks your hand in real-time
 - [Performance](#-performance)
 - [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
-- [License](#-license)
+
 
 ---
 
@@ -68,7 +68,7 @@ The system displays:
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/yourusername/hand-danger-detection.git
+git clone https://github.com/saikiranpulagalla/hand-danger-detection.git
 cd hand-danger-detection
 ```
 
@@ -413,24 +413,6 @@ Describe:
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2024 [Your Name]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software...
-```
-
----
-
 ## 🙏 Acknowledgments
 
 - **OpenCV Community**: For excellent documentation
@@ -439,31 +421,8 @@ copies of the Software...
 
 ---
 
-## 📞 Contact
 
-**Project Maintainer**: [Your Name]
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-- Twitter: [@yourhandle](https://twitter.com/yourhandle)
-
-**Project Link**: [https://github.com/yourusername/hand-danger-detection](https://github.com/yourusername/hand-danger-detection)
-
----
-
-## 📚 Additional Resources
-
-### Tutorials
-- [OpenCV Hand Detection Guide](https://docs.opencv.org/)
-- [Skin Color Segmentation Theory](https://example.com)
-- [Distance Calculation Methods](https://example.com)
-
-### Related Projects
-- [Hand Gesture Recognition](https://github.com/example/gesture-recognition)
-- [Computer Vision Safety Systems](https://github.com/example/cv-safety)
-
-### Papers
-- "Skin Color Detection in YCrCb Space" (2019)
-- "Real-Time Hand Tracking for HCI" (2020)
+**Project Link**: [https://github.com/saikiranpulagalla/hand-danger-detection](https://github.com/saikiranpulagalla/hand-danger-detection)
 
 ---
 
@@ -472,7 +431,5 @@ copies of the Software...
 **Built with ❤️ using OpenCV and Python**
 
 ⭐ **Star this repo if you find it helpful!** ⭐
-
-[Report Bug](https://github.com/yourusername/hand-danger-detection/issues) · [Request Feature](https://github.com/yourusername/hand-danger-detection/issues) · [Documentation](https://github.com/yourusername/hand-danger-detection/wiki)
 
 </div>
