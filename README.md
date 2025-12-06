@@ -23,7 +23,6 @@ A **CPU-optimized computer vision prototype** that tracks your hand in real-time
 - [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
 
-
 ---
 
 ## ✨ Features
@@ -114,6 +113,9 @@ python main.py
 | `q` | Quit application |
 | `c` | Toggle calibration mode |
 | `SPACE` | Capture skin color (during calibration) |
+| `d` | Reset danger zone to center |
+| `s` | Increase sensitivity (lower min hand area) |
+| `l` | Decrease sensitivity (raise min hand area) |
 
 ---
 
@@ -227,35 +229,59 @@ distance = min(√((hand_x - boundary_x)² + (hand_y - boundary_y)²))
 
 ### Project Structure
 ```
-hand-danger-demo/
+hand-danger-detection/
 ├── main.py                 # Main application loop
+├── main_demo.py            # Demo mode (simulated hand, no webcam)
 ├── hand_detector.py        # Hand detection logic
 ├── virtual_object.py       # Danger zone rendering
 ├── distance_logic.py       # Distance & state management
 ├── utils.py                # Helper utilities
+├── analyze_colors.py       # Utility: color analysis helper
+├── debug_mask.py           # Utility: mask debugging tool
+├── launch.bat              # Windows helper to activate venv & run app
+├── pyproject.toml          # Optional packaging / metadata
 ├── requirements.txt        # Dependencies
-└── README.md                # This file
+└── README.md               # This file
 ```
 
+### Utilities & Helpers
+
+- `main_demo.py`: Runs the application in demo mode using a simulated hand (useful when no webcam is available). See the **Demo** section above for controls and usage.
+- `analyze_colors.py`: Helper script for analyzing color ranges and thresholds used by the detector.
+- `debug_mask.py`: Utility to visualize and debug skin/mask outputs during development.
+- `launch.bat`: Windows convenience script to activate a virtual environment and launch `main.py` (edit as needed for your environment).
+- `pyproject.toml`: Optional project metadata / packaging configuration (may be present alongside `requirements.txt`).
 ### Customizing Thresholds
 
 #### Distance Thresholds
-Edit `main.py`:
+Edit `main.py` (current defaults shown):
 ```python
 distance_manager = DistanceStateManager(
-    safe_threshold=200,      # Default: 150
-    warning_threshold=80     # Default: 60
+    safe_threshold=300,      # Distance (px): SAFE if > 300, DANGER if < 120
+    warning_threshold=120    # WARNING state between 120–300
 )
 ```
+These thresholds determine state transitions:
+- **SAFE**: distance > 300 px
+- **WARNING**: 120 < distance ≤ 300 px
+- **DANGER**: distance ≤ 120 px
 
 #### Hand Detection Sensitivity
-Edit `main.py`:
+Edit `main.py` (effective thresholds applied during detection):
 ```python
 hand_detector = HandDetector(
-    min_hand_area=3000,      # Default: 5000 (lower = more sensitive)
-    max_hand_area=150000     # Default: 100000
+    min_hand_area=1000,      # Constructor default (not used directly)
+    max_hand_area=500000,    # Constructor default (not used directly)
+    use_bg_subtraction=True  # Use background subtraction + skin color
 )
 ```
+**Note:** The actual hand area filtering thresholds applied in `detect_hand()` are:
+- **Minimum area**: 2000 px² (filters out noise)
+- **Maximum area**: 100000 px² (rejects large objects/arms)
+
+To adjust sensitivity, use keyboard:
+- Press `s` to increase sensitivity (lower min area)
+- Press `l` to decrease sensitivity (raise min area)
 
 #### Danger Zone Configuration
 Edit `main.py`:
@@ -267,13 +293,22 @@ danger_zone = VirtualDangerZone(
 )
 ```
 
-#### Skin Color Thresholds
-Edit `hand_detector.py`:
+#### Skin Color Thresholds (Calibration)
+The system uses **adaptive skin color detection** that can be calibrated at runtime:
+
+1. **During runtime**: Press `c` to enter calibration mode, place your open palm in the green box, press `SPACE` to capture.
+   - System will auto-adjust YCrCb and HSV thresholds based on your skin tone and lighting.
+
+2. **Manual adjustment** (advanced): Edit `hand_detector.py` to modify the default `skin_ranges`:
 ```python
-# YCrCb color space bounds
-self.lower_skin = np.array([0, 133, 77], dtype=np.uint8)
-self.upper_skin = np.array([255, 173, 127], dtype=np.uint8)
+# In HandDetector.__init__() - YCrCb color space
+self.skin_ranges = [
+    {'space': 'YCrCb', 'lower': np.array([80, 100, 130], dtype=np.uint8), 
+     'upper': np.array([200, 125, 160], dtype=np.uint8)},
+]
 ```
+
+**Note:** The detector also uses HSV color space as a fallback for robustness. Calibration updates both automatically.
 
 ---
 
@@ -317,12 +352,15 @@ self.upper_skin = np.array([255, 173, 127], dtype=np.uint8)
 **Symptom**: Rapid switching between SAFE/WARNING/DANGER
 
 **Solutions**:
-1. **Increase History Length**:
+1. **Increase History Length** (in `distance_logic.py`):
    ```python
-   self.history_length = 10  # Default: 5
+   self.history_length = 10  # Default: 5 (uses majority voting over more frames)
    ```
-2. **Widen Thresholds**: Increase gap between state boundaries
-3. **Add Hysteresis**: Implement different thresholds for transitions
+2. **Widen Thresholds**: Increase gap between state boundaries in `main.py`:
+   ```python
+   distance_manager = DistanceStateManager(safe_threshold=350, warning_threshold=100)
+   ```
+3. **Improve Lighting**: Better lighting = more stable hand detection = fewer false positives
 
 ---
 
@@ -330,12 +368,14 @@ self.upper_skin = np.array([255, 173, 127], dtype=np.uint8)
 
 ### Benchmarks
 
-| Hardware | Resolution | FPS | CPU Usage |
-|----------|-----------|-----|-----------|
-| Intel i5-8265U | 640x480 | 18-22 | 25-30% |
-| AMD Ryzen 5 3600 | 640x480 | 22-28 | 15-20% |
-| Apple M1 | 640x480 | 28-35 | 12-18% |
-| Raspberry Pi 4 | 480x360 | 8-12 | 60-70% |
+| Hardware | Resolution | FPS | Notes |
+|----------|-----------|-----|-------|
+| Intel i5-8265U | 640x480 | 18-22 | Typical laptop CPU |
+| AMD Ryzen 5 3600 | 640x480 | 22-28 | Desktop CPU |
+| Apple M1 | 640x480 | 28-35 | MacBook |
+| Raspberry Pi 4 | 480x360 | 8-12 | IoT/Edge device (CPU-intensive) |
+
+**Current system**: Uses pure OpenCV (YCrCb + HSV skin detection, morphological ops, contour finding) — no GPU acceleration, fully CPU-based.
 
 ### Optimization Tips
 
@@ -423,6 +463,12 @@ Describe:
 
 
 **Project Link**: [https://github.com/saikiranpulagalla/hand-danger-detection](https://github.com/saikiranpulagalla/hand-danger-detection)
+
+---
+
+### Papers
+- "Skin Color Detection in YCrCb Space" (2019)
+- "Real-Time Hand Tracking for HCI" (2020)
 
 ---
 
