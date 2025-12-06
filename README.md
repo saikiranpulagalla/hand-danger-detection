@@ -44,7 +44,7 @@ A **CPU-optimized computer vision prototype** that tracks your hand in real-time
 ```
 STATE: SAFE      ────→  STATE: WARNING  ────→  STATE: DANGER
 Distance: 250px         Distance: 120px         Distance: 45px
-[Green Zone]            [Orange Zone]           [!!! RED ALERT !!!]
+[Green Zone]            [Orange Zone]           [!!! DANGER DANGER !!!]
 ```
 
 ### Real-Time Visualization
@@ -54,7 +54,7 @@ The system displays:
 - 🔵 **Fingertip** (blue circle)
 - 📏 **Distance line** (yellow line to nearest boundary)
 - 📊 **Live metrics** (FPS, distance, danger level %)
-- 🚨 **Danger alerts** (blinking text when in danger zone)
+- 🚨 **Danger alerts** (blinking "DANGER DANGER" text when in danger zone)
 
 ---
 
@@ -100,6 +100,17 @@ pip install opencv-python>=4.8.0 numpy>=1.24.0
 ```bash
 python main.py
 ```
+
+### Run in Demo Mode (No Webcam Required)
+```bash
+python main_demo.py
+```
+
+**Demo Mode** simulates a virtual hand so you can test the system without a webcam:
+- Arrow keys (`↑` `↓` `←` `→`) move the hand
+- `+` / `-` keys adjust hand size
+- `r` resets hand to center
+- `q` quits the demo
 
 ### First-Time Setup
 1. Position yourself 2-3 feet from webcam
@@ -215,13 +226,15 @@ distance = min(√((hand_x - boundary_x)² + (hand_y - boundary_y)²))
 ### State Machine
 
 ```
-┌──────┐  distance > 150px   ┌─────────┐  distance > 60px   ┌────────┐
-│ SAFE ├───────────────────→ │ WARNING ├──────────────────→ │ DANGER │
-└──────┘                      └─────────┘                     └────────┘
+┌──────┐  distance > 300px   ┌─────────┐  distance > 120px  ┌────────┐
+│ SAFE ├──────────────────→ │ WARNING ├─────────────────→ │ DANGER │
+└──────┘                      └─────────┘                    └────────┘
    ↑                              ↑                               ↑
-   └──────────────────────────────┴───────────────────────────────┘
+   └──────────────────────────────┴────────────────────────────────┘
               Majority voting over 5 frames (smoothing)
 ```
+
+**Note:** Actual thresholds in `main.py` are `safe_threshold=300` and `warning_threshold=120` (pixels from hand to boundary).
 
 ---
 
