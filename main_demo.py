@@ -165,11 +165,11 @@ def main_demo():
         # 6. DANGER ALERT
         if state == 'DANGER':
             h, w = frame.shape[:2]
-            danger_text = "!!! DANGER !!!"
+            danger_text = "DANGER DANGER"
             blink = int(time.time() * 3) % 2
             if blink:
                 draw_text_with_background(
-                    frame, danger_text, (w // 2 - 180, h // 2),
+                    frame, danger_text, (w // 2 - 200, h // 2),
                     font_scale=2.0, color=(255, 255, 255),
                     bg_color=(0, 0, 255), thickness=4
                 )
